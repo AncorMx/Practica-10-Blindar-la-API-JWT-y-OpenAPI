@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `clases` ADD COLUMN `duracionMin` INTEGER NOT NULL DEFAULT 60;

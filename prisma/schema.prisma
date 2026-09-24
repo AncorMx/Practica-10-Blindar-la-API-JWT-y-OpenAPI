@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ──────────────────────────────────────────
+// Migración 1: inicial  (solo Clase base)
+// Migración 2: agregar_descripcion_clase
+// Migración 5: agregar_duracion_clase
+// ──────────────────────────────────────────
+model Clase {
+  id          Int       @id @default(autoincrement())
+  nombre      String
+  duracionMin Int
+  descripcion String?
+  horarios    Horario[]
+
+  @@map("clases")
+}
+
+// ──────────────────────────────────────────
+// Migración 3: agregar_horarios
+// ──────────────────────────────────────────
+model Horario {
+  id            Int           @id @default(autoincrement())
+  claseId       Int
+  dia           String
+  horaInicio    String
+  cupoMaximo    Int
+  entrenador    String
+  clase         Clase         @relation(fields: [claseId], references: [id])
+  inscripciones Inscripcion[]
+
+  @@map("horarios")
+}
+
+// ──────────────────────────────────────────
+// Migración 4: agregar_miembros
+// ──────────────────────────────────────────
+model Miembro {
+  id            Int           @id @default(autoincrement())
+  nombre        String
+  correo        String        @unique
+  membresia     String
+  activo        Boolean       @default(true)
+  inscripciones Inscripcion[]
+
+  @@map("miembros")
+}
+
+// ──────────────────────────────────────────
+// Migración 6: agregar_inscripciones
+// ──────────────────────────────────────────
+enum EstadoInscripcion {
+  confirmada
+  cancelada
+}
+
+model Inscripcion {
+  id         Int                @id @default(autoincrement())
+  horarioId  Int
+  miembroId  Int
+  estado     EstadoInscripcion  @default(confirmada)
+  creadaEn   DateTime           @default(now())
+  horario    Horario            @relation(fields: [horarioId], references: [id])
+  miembro    Miembro            @relation(fields: [miembroId], references: [id])
+
+  @@unique([horarioId, miembroId])
+  @@map("inscripciones")
+}
