@@ -50,25 +50,6 @@ Proyecto de NestJS para la gestión de clases, horarios, miembros e inscripcione
 
 ---
 
-## Práctica 8 (Preguntas anteriores)
-
-1. **¿Por qué el paquete se llama `@prisma/adapter-mariadb` si usamos MySQL?**  
-   Porque MariaDB y MySQL usan el mismo protocolo de red y comunicación, así que el adaptador sirve para los dos motores.
-
-2. **¿Editar `schema.prisma` cambió la base de datos antes de migrar?**  
-   No. Solo cambia el archivo de código. La base de datos no cambia hasta que corres la migración (`prisma migrate` o `prisma db push`).
-
-3. **¿La carpeta de migraciones es una foto o un historial?**  
-   Es un historial con los cambios de la base de datos a lo largo del tiempo.
-
-4. **¿Por qué `Horario.clase` no crea columna en la base de datos y `Horario.claseId` sí?**  
-   Porque `claseId` es la columna física (llave foránea) en la tabla MySQL, mientras que `Horario.clase` es solo una relación virtual de Prisma para hacer consultas.
-
-5. **¿De dónde sale la relación muchos a muchos entre Miembro y Horario?**  
-   De la tabla `Inscripcion`, que funciona como tabla intermedia relacionando el id de miembro con el id de horario.
-
----
-
 ## Evidencias
 Todas las capturas de pantalla de las pruebas con Swagger y Postman, junto con la explicación de cada caso y el diagrama de secuencia JWT, están documentadas en [`evidencias/EVIDENCIAS.md`](evidencias/EVIDENCIAS.md).
 
