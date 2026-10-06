@@ -12,18 +12,21 @@ import {
 import { HorariosService } from './horarios.service';
 import type { CrearHorarioDto } from './dto/crear-horario.dto';
 import type { ActualizarHorarioDto } from './dto/actualizar-horario.dto';
+import { Publico } from '../auth/decoradores/publico.decorator';
 
 @Controller('horarios')
 export class HorariosController {
   constructor(private readonly horariosService: HorariosService) {}
 
   /** GET /horarios */
+  @Publico()
   @Get()
   listar() {
     return this.horariosService.listar();
   }
 
   /** GET /horarios/2 */
+  @Publico()
   @Get(':id')
   async buscar(@Param('id') id: string) {
     const horario = await this.horariosService.buscar(Number(id));

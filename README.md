@@ -49,6 +49,50 @@ El que bloquea realmente es el **navegador web del usuario**, no el servidor. El
 
 ---
 
+## Práctica 10: Respuestas a las preguntas
+
+### Parte 1
+1. **¿Por qué el filtro atrapa la clase base y no cada error por separado?**
+   Porque al usar herencia en TypeScript, `ErrorDeDominio` es la clase padre. Al indicarle a `@Catch(ErrorDeDominio)` que atrape al padre, automáticamente atrapa a cualquier clase hija (como `CupoLlenoError`), evitando tener que registrar cada excepción individualmente.
+
+2. **¿Por qué este middleware no podría decidir si un usuario tiene permiso para una ruta?**
+   Porque el middleware es de Express y se ejecuta antes de que NestJS determine a qué método o controlador va dirigida la petición. No tiene acceso a los decoradores (como `@Roles`) ni al contexto de ejecución de NestJS.
+
+3. **¿Por qué la petición que responde 409 no aparece en el registro del interceptor?**
+   Porque el interceptor (`LoggingInterceptor`) usa `.pipe(tap(...))` en el flujo normal (exitoso) de la respuesta. Cuando el servicio lanza una excepción, el flujo normal se rompe y salta directamente al filtro de excepciones, ignorando el `tap` del interceptor.
+
+4. **¿Por qué este cambio (sobre) rompe a cualquier cliente que ya estuviera usando la API?**
+   Porque la estructura de la respuesta cambia. El cliente esperaba recibir la información directamente en la raíz de la respuesta, pero ahora todo viene envuelto dentro de la propiedad `data` de un objeto nuevo (`{ data: [...], meta: {...} }`).
+
+5. **Si el servidor respondió en los dos casos de CORS, ¿quién bloquea y a quién protege?**
+   El servidor procesa la petición y manda una respuesta, pero es el **navegador web del cliente** quien bloquea el acceso a la respuesta. Esto **protege al usuario** de que sitios web maliciosos en otros orígenes roben sus datos haciendo peticiones a otras APIs sin que el usuario se dé cuenta.
+
+### Parte 2
+1. **¿Por qué el campo se llama passwordHash y no password?**
+   Para evitar enviar o guardar contraseñas en texto claro por accidente. Al llamarlo `passwordHash`, el desarrollador es consciente de que ahí solo debe ir texto cifrado (un hash), reduciendo el riesgo de filtraciones.
+
+2. **Si el contenido del token se puede leer, ¿qué es lo que protege la firma?**
+   Protege la **integridad y autenticidad**. Aunque cualquiera lea el payload, si alguien intenta modificar un dato (como cambiar su rol a `admin`), la firma se invalida automáticamente porque el atacante no tiene la llave secreta (`JWT_SECRET`) para volver a firmar el token.
+
+3. **¿Por qué los dos errores del inicio de sesión dicen exactamente lo mismo?**
+   Por seguridad contra enumeración. Si los mensajes fueran distintos (ej. 'El correo no existe' vs 'Contraseña incorrecta'), un atacante podría usar fuerza bruta para descubrir qué correos sí están registrados en el sistema probando aleatoriamente.
+
+4. **¿Por qué es más seguro proteger todo y abrir a mano, que al revés?**
+   Porque si olvidas abrir una ruta pública, el sistema falla de manera segura (lanza 401 y te das cuenta al probar). Si fuera público por omisión y olvidas proteger una ruta, dejas un hueco de seguridad gravísimo que probablemente pase desapercibido.
+
+5. **¿Cuál es la diferencia entre un 401 y un 403?**
+   - **401 Unauthorized:** No sabemos quién eres (no hay token o es inválido). Es un error de autenticación.
+   - **403 Forbidden:** Sabemos quién eres (el token es válido), pero no tienes permiso o autorización para hacer la acción solicitada.
+
+6. **¿Cuántas líneas del AuthService tuvieron que cambiar para pasar de memoria a MySQL? ¿Por qué?**
+   **Cero líneas.** Gracias a la inyección de dependencias y al principio de inversión de dependencias, `AuthService` solo depende de la interfaz `UsuarioRepository`. El cambio se hizo únicamente en `auth.module.ts` inyectando la implementación de Prisma en lugar de la de memoria.
+
+7. **¿Por qué es importante tomar al usuario de los claims del token y no de un parámetro de la URL o del cuerpo?**
+   Porque el cliente controla la URL y el cuerpo de la petición y podría falsificarlos. En cambio, los claims del token están protegidos por la firma del servidor; no se pueden alterar sin invalidar el token. 
+   **Ejemplo concreto:** Si la API confiara en el ID del cuerpo (`{ "miembroId": 3 }`), Karla (miembro 1) podría hacerse pasar por Sofía (miembro 3) y cancelar su inscripción. Al tomar a Karla directamente del token validado por el `@UsuarioActual()`, si intenta cancelar una inscripción que no es suya, el controlador se da cuenta y lo bloquea con un 403.
+
+---
+
 ## Práctica 8 (Preguntas anteriores)
 
 1. **¿Por qué el paquete se llama `@prisma/adapter-mariadb` si usamos MySQL?**  

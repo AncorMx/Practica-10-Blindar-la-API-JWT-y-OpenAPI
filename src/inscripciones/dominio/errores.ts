@@ -1,4 +1,4 @@
-export class ErrorDeDominio extends Error {
+export abstract class ErrorDeDominio extends Error {
   constructor(message: string) {
     super(message);
     this.name = this.constructor.name;

@@ -74,3 +74,21 @@ model Inscripcion {
   @@unique([horarioId, miembroId])
   @@map("inscripciones")
 }
+
+// Al final del archivo, junto a los otros cuatro modelos.
+// rol va como texto para que el repositorio devuelva el mismo Rol del
+// dominio sin traducir entre dos enums.
+model Usuario {
+  id           Int      @id @default(autoincrement())
+  // @unique: no puede haber dos cuentas con el mismo correo
+  correo       String   @unique @db.VarChar(160)
+  // el hash de bcrypt, nunca la contrasena
+  passwordHash String   @db.VarChar(72)
+  rol          String   @default("miembro") @db.VarChar(20)
+  // ? = puede ser null (el personal no es miembro)
+  miembroId    Int?
+  creadoEn     DateTime @default(now())
+
+  // la tabla se llama usuarios
+  @@map("usuarios")
+}

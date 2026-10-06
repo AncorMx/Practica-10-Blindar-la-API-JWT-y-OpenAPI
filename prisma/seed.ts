@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import * as mariadb from 'mariadb';
 import 'dotenv/config';
+import * as bcrypt from 'bcryptjs'; // arriba, con los demas imports
 
 const dbUrl = (process.env.DATABASE_URL || '').replace('mysql:', 'mariadb:');
 const pool = mariadb.createPool(dbUrl);
@@ -13,6 +14,7 @@ async function main() {
   await prisma.horario.deleteMany();
   await prisma.clase.deleteMany();
   await prisma.miembro.deleteMany();
+  await prisma.usuario.deleteMany(); // borramos usuarios al principio
 
   console.log('Poblando base de datos...');
 
@@ -36,6 +38,16 @@ async function main() {
       { id: 1, nombre: 'Karla Duarte', correo: 'karla@itson.mx', membresia: 'premium', activo: true },
       { id: 2, nombre: 'Omar Valdez', correo: 'omar@itson.mx', membresia: 'plus', activo: true },
       { id: 3, nombre: 'Sofia Ibarra', correo: 'sofia@itson.mx', membresia: 'basica', activo: true },
+    ],
+  });
+
+  // las tres cuentas de prueba, ahora guardadas en MySQL.
+  const passwordHash = await bcrypt.hash('gimnasio2026', 10);
+  await prisma.usuario.createMany({
+    data: [
+      { correo: 'karla@itson.mx', passwordHash, rol: 'miembro', miembroId: 1 },
+      { correo: 'ana@itson.mx', passwordHash, rol: 'entrenador' },
+      { correo: 'admin@itson.mx', passwordHash, rol: 'admin' },
     ],
   });
 
